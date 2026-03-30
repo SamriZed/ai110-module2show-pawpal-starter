@@ -2,16 +2,37 @@
 
 ## 1. System Design
 
+- Add and manage pet profiles and their needs
+- Input constraints and preferences
+- Generate and review a daily care plan with explanations
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+
+Classes I included are: Scheduler, DailySchedule, Owner, Pet, Task, TimeBlock. 
+
+-> Task represents a pet care task and check if it is a high priority and if it can fit in the time block.
+-> TimeBlock represents a time slot in the daile schedule and check if it is available for a task, get duration, and assign a task to it.
+-> Pet represents a pet and its care needs and preferences.
+-> Owner represents the pet owner and can add/ remove pets and tasks, get available time, and set prefered time slots.
+-> Daily schedule represents a single day's schedule and can generate schedule, add scheduled task, explain schedule, and get schedule summary.
+-> Scheduler handles scheduling logic and optimization. It priortize tasks and fit tasks in time blocks.
+
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+Yes, I made several adjustments during implementation. Based on Copilot’s suggestions, I added three new attributes to the Task class: preferred_time_window, must_follow_task, and min_interval_after. These should address the previously missing task constraints.
+
+In the Owner class, I changed available_time_per_day to be measured in minutes to avoid unit mismatches, since Task.duration is also in minutes. I also expanded the fields under owner.preferences, which were previously too vague.
+
+Additionally, I introduced a task_to_timeblock mapping for explicit scheduling, as well as an unscheduled_tasks list to track tasks that could not be accommodated. These changes also made explain_schedule() much easier to implement.
+
+Finally, I updated the Scheduler by adding a generate_daily_timeblocks() method to create time blocks based on owner preferences, and a _validate_schedule() method to ensure that tasks fit within the available time.
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
