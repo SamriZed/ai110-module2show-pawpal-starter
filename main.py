@@ -67,7 +67,7 @@ pet_1.add_task(task_2)
 pet_1.add_task(task_3)
 pet_2.add_task(task_4)
 pet_2.add_task(task_5)
-print(f"\n✓ Tasks created and assigned to pets")
+print("\n✓ Tasks created and assigned to pets")
 
 # Set owner's preferred timeblocks
 preferred_blocks = [
@@ -76,11 +76,11 @@ preferred_blocks = [
     TimeBlock(start_time=time(17, 0), end_time=time(21, 0)),    # Evening: 4 hours
 ]
 owner_1.set_preferred_timeblocks(preferred_blocks)
-print(f"✓ Preferred timeblocks set")
+print("✓ Preferred timeblocks set")
 
 # Generate schedules
 print(f"\n{'=' * 80}")
-print(f"Generating Feasibility Reports...")
+print("Generating Feasibility Reports...")
 print(f"{'=' * 80}")
 
 scheduler = Scheduler()
@@ -98,7 +98,7 @@ for key, value in report_buddy.items():
 
 # Show multi-pet coordination (new feature)
 print(f"\n{'=' * 80}")
-print(f"Generating Coordinated Multi-Pet Schedules...")
+print("Generating Coordinated Multi-Pet Schedules...")
 print(f"{'=' * 80}")
 
 multi_schedules = scheduler.optimize_multi_pet_schedule(owner_1, datetime.now())
@@ -192,7 +192,7 @@ else:
 
 # Also show individual optimization for comparison
 print(f"\n{'=' * 80}")
-print(f"Individual Optimized Schedule Examples (for comparison):")
+print("Individual Optimized Schedule Examples (for comparison):")
 print(f"{'=' * 80}")
 
 daily_schedule_fluffy = scheduler.optimize(owner_1, pet_1, pet_1.tasks)
@@ -325,7 +325,7 @@ print(f"{'-' * 80}")
 
 # Get completed tasks across all pets
 completed_all = scheduler.filter_tasks_by_status(owner_1, completed=True)
-print(f"\nCompleted tasks across all pets:")
+print("\nCompleted tasks across all pets:")
 for pet_name, tasks_list in completed_all.items():
     print(f"\n  {pet_name}: {len(tasks_list)} completed")
     for task in tasks_list:
@@ -333,7 +333,7 @@ for pet_name, tasks_list in completed_all.items():
 
 # Get incomplete tasks across all pets
 incomplete_all = scheduler.filter_tasks_by_status(owner_1, completed=False)
-print(f"\nIncomplete tasks across all pets:")
+print("\nIncomplete tasks across all pets:")
 for pet_name, tasks_list in incomplete_all.items():
     print(f"\n  {pet_name}: {len(tasks_list)} incomplete")
     for task in tasks_list:
@@ -374,7 +374,7 @@ print(f"{'-' * 80}")
 
 # Get incomplete tasks for Max specifically
 max_incomplete = scheduler.filter_tasks(owner_1, completed=False, pet_name="Max")
-print(f"\nIncomplete tasks for Max specifically:")
+print("\nIncomplete tasks for Max specifically:")
 for pet_name, tasks_list in max_incomplete.items():
     print(f"\n  {pet_name}: {len(tasks_list)} incomplete")
     for task in sorted_by_time:  # Sort them first
@@ -486,9 +486,9 @@ pet_recurring.add_task(weekly_grooming)
 pet_recurring.add_task(one_time_vaccine)
 
 print(f"\n✓ Created pet '{pet_recurring.name}' with recurring tasks:")
-print(f"  • Daily Morning Walk (DAILY recurring)")
-print(f"  • Weekly Grooming (WEEKLY recurring)")
-print(f"  • Annual Vaccine (MONTHLY recurring - no auto-create)")
+print("  • Daily Morning Walk (DAILY recurring)")
+print("  • Weekly Grooming (WEEKLY recurring)")
+print("  • Annual Vaccine (MONTHLY recurring - no auto-create)")
 
 print(f"\n{'-' * 80}")
 print(f"BEFORE: Task counts for {pet_recurring.name}:")
@@ -498,27 +498,29 @@ print(f"  Completed tasks: {len(pet_recurring.get_completed_tasks())}")
 
 # Mark the daily walk as complete - should auto-create next occurrence
 print(f"\n{'-' * 80}")
-print(f"Marking 'Daily Morning Walk' as complete...")
+print("Marking 'Daily Morning Walk' as complete...")
 result1 = scheduler.mark_recurring_task_complete(owner_1, "Daisy", "Daily Morning Walk")
 print(f"  {result1['message']}")
-if result1['next_task_created']:
-    print(f"  → Next task created: {result1['next_task']['name']} ({result1['next_task']['frequency']})")
+next_task_1 = result1.get("next_task")
+if result1.get("next_task_created") and isinstance(next_task_1, dict):
+    print(f"  → Next task created: {next_task_1.get('name')} ({next_task_1.get('frequency')})")
 
 # Mark the weekly grooming as complete - should auto-create next occurrence
 print(f"\n{'-' * 80}")
-print(f"Marking 'Weekly Grooming' as complete...")
+print("Marking 'Weekly Grooming' as complete...")
 result2 = scheduler.mark_recurring_task_complete(owner_1, "Daisy", "Weekly Grooming")
 print(f"  {result2['message']}")
-if result2['next_task_created']:
-    print(f"  → Next task created: {result2['next_task']['name']} ({result2['next_task']['frequency']})")
+next_task_2 = result2.get("next_task")
+if result2.get("next_task_created") and isinstance(next_task_2, dict):
+    print(f"  → Next task created: {next_task_2.get('name')} ({next_task_2.get('frequency')})")
 
 # Try marking the monthly vaccine - should NOT auto-create
 print(f"\n{'-' * 80}")
-print(f"Marking 'Annual Vaccine' as complete...")
+print("Marking 'Annual Vaccine' as complete...")
 result3 = scheduler.mark_recurring_task_complete(owner_1, "Daisy", "Annual Vaccine")
 print(f"  {result3['message']}")
 if not result3['next_task_created']:
-    print(f"  → No auto-creation for MONTHLY recurring tasks (manual management)")
+    print("  → No auto-creation for MONTHLY recurring tasks (manual management)")
 
 print(f"\n{'-' * 80}")
 print(f"AFTER: Task counts for {pet_recurring.name}:")
@@ -536,7 +538,7 @@ for i, task in enumerate(pet_recurring.get_tasks(), 1):
 
 # Get completion report
 print(f"\n{'-' * 80}")
-print(f"COMPLETION REPORT:")
+print("COMPLETION REPORT:")
 report = scheduler.get_task_completion_report(owner_1)
 for pet_name in report['pets']:
     if report['pets'][pet_name]['completed_tasks']:

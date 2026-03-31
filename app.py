@@ -1,6 +1,5 @@
 import streamlit as st
-from pawpal_system import Owner, Pet, Task, TimeBlock, Scheduler, Priority, Frequency
-from datetime import time
+from pawpal_system import Owner, Pet, Task, Scheduler, Priority
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -13,6 +12,9 @@ if "pet" not in st.session_state:
 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
+
+if "selected_pet_name" not in st.session_state:
+    st.session_state.selected_pet_name = None
 
 st.title("🐾 PawPal+")
 
@@ -70,24 +72,55 @@ if available_time != st.session_state.owner.available_time_per_day:
 
 # Pet section
 st.subheader("Pet Information")
+
+# If pets already exist, let user switch current pet.
+if st.session_state.owner.pets:
+    pet_names = [p.name for p in st.session_state.owner.pets]
+
+    if st.session_state.selected_pet_name not in pet_names:
+        st.session_state.selected_pet_name = pet_names[0]
+
+    selected_name = st.selectbox(
+        "Select current pet",
+        pet_names,
+        index=pet_names.index(st.session_state.selected_pet_name),
+        key="pet_selector_input"
+    )
+    st.session_state.selected_pet_name = selected_name
+    st.session_state.pet = next((p for p in st.session_state.owner.pets if p.name == selected_name), None)
+
 col_pet1, col_pet2 = st.columns(2)
 with col_pet1:
     pet_name = st.text_input("Pet name", value=st.session_state.pet.name if st.session_state.pet else "Mochi", key="pet_name_input")
 with col_pet2:
-    species = st.selectbox("Species", ["dog", "cat", "other"], key="species_input")
+    current_species = st.session_state.pet.pet_type if st.session_state.pet else "dog"
+    species_options = ["dog", "cat", "other"]
+    species = st.selectbox("Species", species_options, index=species_options.index(current_species) if current_species in species_options else 0, key="species_input")
 
 if st.button("Create/Update Pet"):
-    # UI collects data → Create Pet object
-    new_pet = Pet(name=pet_name, pet_type=species, age=0)
-    
-    # Call Owner.add_pet() - THE KEY METHOD HANDLING PET DATA
-    st.session_state.owner.add_pet(new_pet)
-    st.session_state.pet = new_pet
-    
-    st.success(f"✨ Pet '{pet_name}' added to {st.session_state.owner.name}'s care!")
+    clean_name = pet_name.strip()
+    if not clean_name:
+        st.error("❌ Pet name cannot be empty.")
+    else:
+        existing_pet = next((p for p in st.session_state.owner.pets if p.name == clean_name), None)
+
+        if existing_pet:
+            existing_pet.pet_type = species
+            st.session_state.pet = existing_pet
+            st.session_state.selected_pet_name = existing_pet.name
+            st.success(f"✅ Pet '{clean_name}' updated.")
+        else:
+            new_pet = Pet(name=clean_name, pet_type=species, age=0)
+            st.session_state.owner.add_pet(new_pet)
+            st.session_state.pet = new_pet
+            st.session_state.selected_pet_name = new_pet.name
+            st.success(f"✨ Pet '{clean_name}' added to {st.session_state.owner.name}'s care!")
 
 if st.session_state.pet:
     st.info(f"📍 Current pet: **{st.session_state.pet.name}** ({st.session_state.pet.pet_type})")
+
+if st.session_state.owner.pets:
+    st.caption(f"Pets in profile: {', '.join([p.name for p in st.session_state.owner.pets])}")
 
 st.markdown("### Tasks")
 st.caption("Add tasks for your pet. These will be scheduled based on priority and duration.")
@@ -115,26 +148,36 @@ if st.button("Add task"):
         
         # Call Pet.add_task() - THE KEY METHOD HANDLING TASK DATA
         st.session_state.pet.add_task(new_task)
-        
-        # Store in UI state for display
-        st.session_state.tasks.append({
-            "title": task_title,
-            "duration_minutes": int(duration),
-            "priority": priority
-        })
+
         st.success(f"✅ Task '{task_title}' added to {st.session_state.pet.name}!")
 
-if st.session_state.tasks:
-    st.write(f"**Current tasks ({len(st.session_state.tasks)}):**")
-    task_display = [
-        {
-            "Task": task["title"],
-            "Duration (min)": task["duration_minutes"],
-            "Priority": task["priority"].upper()
-        }
-        for task in st.session_state.tasks
-    ]
-    st.table(task_display)
+
+# Use Scheduler to sort and check conflicts
+current_pet_tasks = st.session_state.pet.get_tasks() if st.session_state.pet else []
+if current_pet_tasks:
+    scheduler = Scheduler()
+    # Sort tasks by preferred time (or scheduled time if available)
+    sorted_tasks = scheduler.sort_by_time(current_pet_tasks)
+    # Conflict summary
+    conflict_summary = scheduler.get_conflict_summary(current_pet_tasks)
+    if conflict_summary and "No conflicts" not in conflict_summary:
+        st.warning(conflict_summary)
+    else:
+        st.success("No scheduling conflicts detected. All tasks are ready to be scheduled!")
+
+    st.markdown(f"### 📝 Sorted Task List ({len(sorted_tasks)})")
+    if sorted_tasks:
+        st.table([
+            {
+                "Task": t.name,
+                "Duration (min)": t.duration,
+                "Priority": t.priority.value.title(),
+                "Preferred Time": t.preferred_time_window.title() if t.preferred_time_window else "-"
+            }
+            for t in sorted_tasks
+        ])
+    else:
+        st.info("No tasks to display.")
 else:
     st.info("No tasks yet. Add one above.")
 
@@ -146,7 +189,7 @@ st.caption("This button will generate a schedule based on your tasks and constra
 if st.button("Generate schedule"):
     if not st.session_state.pet:
         st.error("❌ Please create a pet first!")
-    elif not st.session_state.tasks:
+    elif not st.session_state.pet.get_tasks():
         st.warning("⚠️ Please add at least one task!")
     else:
         # Create scheduler and generate schedule

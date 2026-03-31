@@ -3,7 +3,7 @@ PawPal+ System - Pet Care Scheduling Application
 Core classes for managing owners, pets, tasks, and daily schedules.
 """
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime, time, timedelta
 from enum import Enum
 from collections import defaultdict
@@ -196,7 +196,7 @@ class Owner:
         self.name: str = name
         self.available_time_per_day: float = available_time_per_day  # in minutes
         self.preferred_timeblocks: List[TimeBlock] = []
-        self.preferences: Dict[str, any] = {
+        self.preferences: Dict[str, Any] = {
             "compact_schedule": True,          # cluster tasks vs spread them
             "prefer_morning": False,           # prefer morning tasks
             "rest_between_minutes": 30,        # minimum rest between tasks
@@ -858,7 +858,7 @@ class Scheduler:
         next_task = task.create_duplicate()
         return next_task
     
-    def mark_recurring_task_complete(self, owner: Owner, pet_name: str, task_name: str) -> Dict[str, any]:
+    def mark_recurring_task_complete(self, owner: Owner, pet_name: str, task_name: str) -> Dict[str, Any]:
         """
         High-level method to mark a recurring task complete and auto-create next occurrence.
         
@@ -920,7 +920,7 @@ class Scheduler:
         result["success"] = True
         return result
     
-    def get_task_completion_report(self, owner: Owner) -> Dict[str, any]:
+    def get_task_completion_report(self, owner: Owner) -> Dict[str, Any]:
         """
         Get a comprehensive report of completed tasks and auto-created recurrences.
         

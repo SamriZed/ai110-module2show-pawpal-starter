@@ -1,31 +1,10 @@
-# Testing PawPal+
-
-To run the test suite and verify system behavior, use the following command:
-
-```bash
-python -m pytest
-```
-
-**Test Coverage:**
-- Task completion and status changes
-- Adding and removing tasks for pets
-- Owner and pet management
-- Time block duration and task fitting
-- Task priority logic
-- Sorting tasks by time
-- Recurring task logic (e.g., daily tasks create new occurrences)
-- Conflict detection (e.g., overlapping/duplicate times)
-
-These tests cover both standard and edge-case scenarios to ensure robust scheduling, recurrence handling, and conflict detection.
-
-**Confidence Level:**
-
-⭐⭐⭐⭐☆ (4/5 stars)
-
-Most critical scheduling and recurrence behaviors are tested and pass. The system is reliable for typical use and edge cases, but further real-world testing is recommended for production deployment.
 # PawPal+ (Module 2 Project)
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+
+## 📸 Demo
+
+![alt text](Demo.png)
 
 ## Scenario
 
@@ -78,3 +57,44 @@ PawPal+ now features a smarter scheduling system that:
 - Provides clear explanations for why tasks are scheduled or left unscheduled
 
 These improvements make daily plans more realistic, efficient, and easier for pet owners to follow.
+
+# Testing PawPal+
+
+To run the test suite and verify system behavior, use the following command:
+
+```bash
+python -m pytest
+```
+
+**Test Coverage:**
+- Task completion and status changes
+- Adding and removing tasks for pets
+- Owner and pet management
+- Time block duration and task fitting
+- Task priority logic
+- Sorting tasks by time
+- Recurring task logic (e.g., daily tasks create new occurrences)
+- Conflict detection (e.g., overlapping/duplicate times)
+
+These tests cover both standard and edge-case scenarios to ensure robust scheduling, recurrence handling, and conflict detection.
+
+**Confidence Level:**
+
+⭐⭐⭐⭐☆ (4/5 stars)
+
+Most critical scheduling and recurrence behaviors are tested and pass. The system is reliable for typical use and edge cases, but further real-world testing is recommended for production deployment.
+
+## Features
+
+- Priority-aware scheduling: Sorts tasks by priority level (`HIGH`, `MEDIUM`, `LOW`), with longer tasks preferred first within each priority tier.
+- Dependency-aware ordering: Keeps tasks with `must_follow_task` after their prerequisite whenever possible.
+- Time-window matching: Prefers timeblocks that match `morning`, `afternoon`, or `evening` task preferences.
+- Greedy timeblock assignment: Assigns each task to the best available block that fits its full duration and tracks unscheduled tasks when capacity is limited.
+- Feasibility checks and warnings: Compares total task minutes to available owner minutes and warns when requests exceed available time.
+- Multi-pet scheduling support: Builds schedules for all pets for a single owner and reports overall utilization.
+- Conflict warnings: Detects missing dependencies, circular dependencies, overloaded time windows, overlap risks, and high-priority overload warnings.
+- Recurrence expansion: Expands recurring tasks across multiple days based on frequency (`DAILY`, `WEEKLY`, `BIWEEKLY`, `MONTHLY`, `ONE_TIME`).
+- Task completion workflow: Marks tasks complete with timestamps and can create next recurring occurrences.
+- Sorting utilities: Includes helpers for sorting by scheduled start time, preferred time window, duration (ascending/descending), and priority + time.
+- Task filtering utilities: Supports filtering by status, pet, category, priority, and recurrence.
+- Per-pet analytics summary: Reports per-pet totals, active/completed counts, duration totals, and completion percentage.
