@@ -4,7 +4,7 @@ Tests for Task completion and Pet task management
 """
 import pytest
 from datetime import time
-from pawpal_system import Owner, Pet, Task, TimeBlock, Priority
+from pawpal_system import Owner, Pet, Task, TimeBlock, Priority, Scheduler, Frequency
 
 
 class TestTaskCompletion:
@@ -321,6 +321,52 @@ class TestHighPriority:
         assert medium_priority_task.is_high_priority() == False
         assert low_priority_task.is_high_priority() == False
 
+
+
+# --- EDGE CASE TESTS: Sorting, Recurrence, Conflict Detection ---
+def test_sort_tasks_by_time_chronological():
+    """Tasks should be sorted by scheduled start time (chronological order)"""
+    # Create tasks with different preferred time windows
+    t1 = Task(name="Morning Feed", duration=15, priority=Priority.HIGH, category="feeding", preferred_time_window="morning")
+    t2 = Task(name="Afternoon Walk", duration=30, priority=Priority.MEDIUM, category="exercise", preferred_time_window="afternoon")
+    t3 = Task(name="Evening Play", duration=20, priority=Priority.LOW, category="enrichment", preferred_time_window="evening")
+    tasks = [t2, t3, t1]  # Out of order
+    scheduler = Scheduler()
+    sorted_tasks = scheduler.sort_tasks_by_time(tasks)
+    sorted_names = [t.name for t in sorted_tasks]
+    assert sorted_names == ["Morning Feed", "Afternoon Walk", "Evening Play"], "Tasks should be sorted by time window"
+
+def test_daily_task_completion_creates_next_occurrence():
+    """Completing a daily recurring task should create a new task for the next day"""
+    pet = Pet(name="Max", pet_type="dog", age=2)
+    task = Task(
+        name="Daily Walk",
+        duration=30,
+        priority=Priority.HIGH,
+        category="exercise",
+        is_recurring=True,
+        frequency=Frequency.DAILY
+    )
+    pet.add_task(task)
+    next_task = pet.mark_task_complete_with_recurrence("Daily Walk")
+    assert next_task is not None, "Next occurrence should be created for recurring task"
+    assert next_task.name == "Daily Walk"
+    assert next_task.due_date is not None, "Next occurrence should have a due date"
+    assert next_task.is_completed is False, "New task should not be completed"
+
+def test_scheduler_detects_duplicate_times():
+    """Scheduler should flag overlapping/duplicate time assignments as conflicts"""
+    t1 = Task(name="Feed", duration=30, priority=Priority.HIGH, category="feeding")
+    t2 = Task(name="Walk", duration=30, priority=Priority.HIGH, category="exercise")
+    tb1 = TimeBlock(start_time=time(9, 0), end_time=time(9, 30), task=t1)
+    tb2 = TimeBlock(start_time=time(9, 0), end_time=time(9, 30), task=t2)  # Overlaps with tb1
+    scheduler = Scheduler()
+    tasks = [t1, t2]
+    task_to_timeblock = {t1: tb1, t2: tb2}
+    pet_lookup = {t1: "TestPet", t2: "TestPet"}
+    conflicts = scheduler.detect_conflicts(tasks, task_to_timeblock=task_to_timeblock, pet_lookup=pet_lookup)
+    assert "overlapping_tasks" in conflicts, "Should detect overlapping tasks"
+    assert any("overlaps" in msg for msg in conflicts["overlapping_tasks"]), "Conflict message should mention overlap"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

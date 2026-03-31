@@ -1,3 +1,28 @@
+# Testing PawPal+
+
+To run the test suite and verify system behavior, use the following command:
+
+```bash
+python -m pytest
+```
+
+**Test Coverage:**
+- Task completion and status changes
+- Adding and removing tasks for pets
+- Owner and pet management
+- Time block duration and task fitting
+- Task priority logic
+- Sorting tasks by time
+- Recurring task logic (e.g., daily tasks create new occurrences)
+- Conflict detection (e.g., overlapping/duplicate times)
+
+These tests cover both standard and edge-case scenarios to ensure robust scheduling, recurrence handling, and conflict detection.
+
+**Confidence Level:**
+
+⭐⭐⭐⭐☆ (4/5 stars)
+
+Most critical scheduling and recurrence behaviors are tested and pass. The system is reliable for typical use and edge cases, but further real-world testing is recommended for production deployment.
 # PawPal+ (Module 2 Project)
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
