@@ -42,11 +42,20 @@ Finally, I updated the Scheduler by adding a generate_daily_timeblocks() method 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+The constrains my scheduler cosiders are: Time,Priority, Preferences, Dependencies, and Recurrence.
+The most critical constraints are those that would make a schedule infeasible or illogical: time (fit and overlap), priority (urgent tasks first), and dependencies (task order).
+Preferences (like time windows) are considered next, as they improve user satisfaction but are flexible.
+Recurrence is handled to ensure ongoing care, but does not override time or priority constraints.
+The scheduler issues warnings (not errors) for soft constraint violations.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+One tradeoff my scheduler makes is that it assigns each task to a single available timeblock that can fit the task’s duration, but it does not check for partial overlaps or attempt to split tasks across multiple timeblocks. If a task cannot fit entirely within one available block, it is left unscheduled.
+
+This tradeoff is reasonable for this scenario because Pet care tasks (like feeding, walking, or grooming) need to be completed in one continuous session, not split across multiple periods. And This approach keeps the scheduling logic straightforward and efficient, avoiding the complexity of handling overlapping or fragmented time slots.
 ---
 
 ## 3. AI Collaboration
